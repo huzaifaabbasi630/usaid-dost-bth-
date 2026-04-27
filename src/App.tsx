@@ -17,6 +17,14 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
+import imgJoy from '../assets/img.png';
+import imgSerenity from '../assets/img2.png';
+import imgCelebration from '../assets/img3.png';
+import bgMusic from '../assets/music.mp3';
+import { CountdownTimer, FlipCards, VoiceNote, DigitalGifts, BlowCandles, InteractiveExtras, FireworksEffect } from './components/PremiumFeatures';
+
+
+
 // --- Components ---
 
 const ConfettiEffect = () => {
@@ -91,16 +99,37 @@ const SurpriseNote = ({ label, message, icon: Icon, color }: { label: string, me
 export default function App() {
   const [stage, setStage] = useState<'landing' | 'opening' | 'main'>('landing');
   const [isPlaying, setIsPlaying] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    // Hidden audio element for background music
-    // Note: Browsers block autoplay. User must interact.
-    audioRef.current = new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'); // Smooth instrumental example
+    audioRef.current = new Audio(bgMusic); 
     audioRef.current.loop = true;
+    
+    // Attempt autoplay immediately
+    const playPromise = audioRef.current.play();
+    if (playPromise !== undefined) {
+      playPromise.then(() => {
+        setIsPlaying(true);
+      }).catch(e => {
+        console.log("Autoplay blocked by browser. User interaction needed.");
+      });
+    }
+
+    // Fallback: Start playing on first user interaction if it was blocked
+    const handleFirstInteraction = () => {
+      if (audioRef.current && audioRef.current.paused) {
+        audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
+      }
+      // Remove listener once interacted
+      document.removeEventListener('click', handleFirstInteraction);
+    };
+    
+    document.addEventListener('click', handleFirstInteraction);
     
     return () => {
       audioRef.current?.pause();
+      document.removeEventListener('click', handleFirstInteraction);
     };
   }, []);
 
@@ -126,13 +155,32 @@ export default function App() {
     }, 2000);
   };
 
-  const handleMakeWish = () => {
+  const triggerConfetti = (e?: React.MouseEvent | any) => {
+    const origin = e ? { 
+      x: e.clientX / window.innerWidth,
+      y: e.clientY / window.innerHeight
+    } : { y: 0.7 };
+
     confetti({
-      particleCount: 200,
-      spread: 90,
-      origin: { y: 0.7 },
+      particleCount: 100,
+      spread: 70,
+      origin,
       colors: ['#fce4ec', '#f3e5f5', '#d4af37', '#e1f5fe']
     });
+  };
+
+  const handleVoiceNoteToggle = (isPlayingVoiceNote: boolean) => {
+    if (isPlayingVoiceNote) {
+      audioRef.current?.pause();
+      setIsPlaying(false);
+    } else {
+      audioRef.current?.play().catch(e => console.log("Music play blocked", e));
+      setIsPlaying(true);
+    }
+  };
+
+  const handleMakeWish = () => {
+    FireworksEffect();
   };
 
   return (
@@ -189,6 +237,9 @@ export default function App() {
               <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto font-light">
                 A little surprise made with love for your special day.
               </p>
+              
+              <CountdownTimer />
+
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -275,6 +326,7 @@ export default function App() {
                   <p className="text-2xl font-accent text-brand-gold pt-4">Happy Birthday ❤️</p>
                 </div>
               </LuxuryCard>
+              <VoiceNote onToggle={handleVoiceNoteToggle} />
             </section>
 
             {/* Photo Gallery (Polaroid Style) */}
@@ -297,19 +349,19 @@ export default function App() {
                     { 
                       id: 1, 
                       title: "Pure Joy", 
-                      img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=80",
+                      img: imgJoy,
                       rotate: -3
                     },
                     { 
                       id: 2, 
                       title: "Serenity", 
-                      img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80",
+                      img: imgSerenity,
                       rotate: 2
                     },
                     { 
                       id: 3, 
                       title: "Celebration", 
-                      img: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80",
+                      img: imgCelebration,
                       rotate: -1
                     }
                   ].map((item) => (
@@ -321,7 +373,14 @@ export default function App() {
                       whileHover={{ scale: 1.05, rotate: 0, zIndex: 20 }}
                       className="bg-white p-4 pb-12 shadow-2xl rounded-sm w-[300px] border border-gray-100 group"
                     >
-                      <div className="overflow-hidden aspect-square mb-4 bg-gray-50">
+                      <div 
+                        className="overflow-hidden aspect-square mb-4 bg-gray-50 cursor-zoom-in"
+                        onClick={(e) => {
+                          setSelectedImage(item.img);
+                          triggerConfetti(e);
+                        }}
+                        onMouseEnter={(e) => triggerConfetti(e)}
+                      >
                         <motion.img 
                           whileHover={{ scale: 1.1 }}
                           src={item.img} 
@@ -420,6 +479,11 @@ export default function App() {
               </div>
             </section>
 
+            <DigitalGifts />
+            <FlipCards />
+            <InteractiveExtras />
+            <BlowCandles />
+
             {/* Final Wish Section */}
             <section className="py-32 px-4 text-center relative overflow-hidden">
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-brand-gold/5 rounded-full blur-[100px] pointer-events-none"></div>
@@ -474,6 +538,28 @@ export default function App() {
               <p className="mt-4 text-xs text-gray-400 tracking-tighter uppercase font-sans">&copy; 2026 Celebration Studio</p>
             </footer>
           </motion.main>
+        )}
+      </AnimatePresence>
+
+      {/* Lightbox for Gallery */}
+      <AnimatePresence>
+        {selectedImage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSelectedImage(null)}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 cursor-zoom-out"
+          >
+            <motion.img
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              src={selectedImage}
+              alt="Preview"
+              className="max-w-full max-h-full rounded-lg shadow-2xl object-contain"
+            />
+          </motion.div>
         )}
       </AnimatePresence>
     </div>
