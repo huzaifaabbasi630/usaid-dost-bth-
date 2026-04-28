@@ -203,7 +203,7 @@ export const InteractiveExtras = () => {
         <Lock className="mx-auto text-brand-gold mb-4" size={40} />
         <h4 className="text-2xl font-serif mb-2">Time Capsule</h4>
         <p className="text-gray-500 mb-6">A secret message locked until next year.</p>
-        <button className="px-6 py-2 rounded-full border border-gray-300 text-gray-400 cursor-not-allowed">Opens 26 April 2027</button>
+        <button className="px-6 py-2 rounded-full border border-gray-300 text-gray-400 cursor-not-allowed">Opens 30 April 2027</button>
       </LuxuryCard>
     </section>
   );
