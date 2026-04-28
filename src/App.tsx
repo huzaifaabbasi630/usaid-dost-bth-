@@ -390,7 +390,7 @@ export default function App() {
                       </div>
                       <p className="text-center font-accent text-2xl text-gray-700 mt-2">{item.title}</p>
                       <div className="absolute bottom-4 right-4 text-[10px] text-gray-300 font-mono tracking-widest uppercase">
-                        2026.04.26
+                        2026.04.30
                       </div>
                     </motion.div>
                   ))}
