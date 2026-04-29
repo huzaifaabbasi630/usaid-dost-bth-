@@ -579,7 +579,7 @@ export default function App() {
               <div className="text-center mb-10">
                 <motion.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
                   <Camera className="mx-auto text-brand-gold mb-4" size={28} />
-                  <h3 className="text-3xl font-serif mb-2">A Slideshow of Us</h3>
+                  <h3 className="text-3xl font-serif mb-2">A Slideshow </h3>
                   <div className="w-24 h-0.5 gold-gradient mx-auto rounded-full" />
                 </motion.div>
               </div>
